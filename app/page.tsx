@@ -6,7 +6,7 @@ import { Navbar1 } from "@/components/navbar1";
 
 export default function Home() {
   return (
-    <div className="mx-auto bg-[#0a1a2f] overflow-hidden text-[#C5A028]">
+    <div className="mx-auto bg-[#010128] overflow-hidden text-[#C5A028]">
       {/* <Navbar1 /> */}
       <div className="mx-auto">
         <Hero7 />

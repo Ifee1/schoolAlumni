@@ -89,10 +89,14 @@ const Hero7 = ({
     });
   }, []);
   return (
-    <section
-      className="sm:py-16 lg:py-26 bg-cover bg-center h-screen text-white"
-      style={{ backgroundImage: "url('/alumniheroImage.png')" }}
-    >
+    <section className="sm:py-16 lg:py-26 bg-cover bg-center h-screen text-white">
+      <Image
+        src="/alumniheroImage.png"
+        alt="Alumni Hero"
+        fill
+        className="object-cover"
+        priority
+      />
       <div className="absolute top-0 left-0 w-full z-20">
         <Navbar1 />
       </div>
