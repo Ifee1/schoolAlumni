@@ -4,8 +4,6 @@ import { Footer2 } from "@/components/footer2";
 import { Hero7 } from "@/components/hero7";
 import { Navbar1 } from "@/components/navbar1";
 
-import Image from "next/image";
-
 export default function Home() {
   return (
     <div className="mx-auto bg-[#0a1a2f] overflow-hidden text-[#C5A028]">
