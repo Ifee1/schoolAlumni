@@ -101,7 +101,7 @@ const Hero7 = ({
         <Navbar1 />
       </div>
       <div className="absolute inset-0 bg-black/40"></div>
-      <div className="mx-auto container text-center flex items-center justify-center flex-col gap-4 py-24 z-10000">
+      <div className="mx-auto container text-center flex items-center justify-center flex-col gap-4 py-24 z-30 relative">
         <div className="flex max-w-5xl items-center justify-center flex-col gap-6">
           <h1 className="text-2xl font-semibold lg:text-6xl mt-2 hero-line md:text-4xl">
             {heading}
