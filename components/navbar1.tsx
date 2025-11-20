@@ -25,6 +25,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface MenuItem {
   title: string;
@@ -134,8 +135,8 @@ const Navbar1 = ({
     },
   ],
   auth = {
-    login: { title: "Login", url: "#" },
-    signup: { title: "Sign up", url: "#" },
+    login: { title: "Login", url: "/login" },
+    signup: { title: "Sign up", url: "/register" },
   },
 }: Navbar1Props) => {
   const [navBg, setNavBg] = useState(false);
@@ -183,14 +184,13 @@ const Navbar1 = ({
                 asChild
                 variant="outline"
                 size="sm"
-                className="hover:bg-[#41CC00]"
+                className="hover:bg-[#41CC00] bg-transparent "
               >
-                <a href={auth.login.url} className="bg-transparent ">
-                  {auth.login.title}
-                </a>
+                <p> {auth.login.title}</p>
               </Button>
+
               <Button asChild size="sm">
-                <a href={auth.signup.url}>{auth.signup.title}</a>
+                <Link href="/register">{auth.signup.title}</Link>
               </Button>
             </div>
           </nav>
@@ -235,11 +235,9 @@ const Navbar1 = ({
 
                     <div className="flex flex-col gap-3">
                       <Button asChild variant="outline">
-                        <a href={auth.login.url}>{auth.login.title}</a>
+                        {auth.login.title}
                       </Button>
-                      <Button asChild>
-                        <a href={auth.signup.url}>{auth.signup.title}</a>
-                      </Button>
+                      <Button asChild>{auth.signup.title}</Button>
                     </div>
                   </div>
                 </SheetContent>
