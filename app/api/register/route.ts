@@ -4,55 +4,78 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 
 export async function POST(req: NextRequest) {
-  console.log("SERVER KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY);
-  console.log("ANON KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-  console.log("URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+  try {
+    const body = await req.json();
+    console.log("🔥 Received body:", body);
 
-  const { email, password } = await req.json();
-  console.log("Received email:", email);
+    const { email, password, first_name, surname } = body;
 
-  // 1️⃣ Create the user in Supabase Auth
-  const { data: authUser, error: authError } = await supabaseServer.auth.signUp(
-    {
-      email,
-      password,
+    console.log("▶ first_name:", first_name);
+    console.log("▶ surname:", surname);
+    console.log("▶ email:", email);
+
+    // 1️⃣ Create auth user
+    const { data: authUser, error: authError } =
+      await supabaseServer.auth.signUp({
+        email,
+        password,
+      });
+
+    console.log("🔥 Auth result:", authUser, authError);
+
+    if (authError) {
+      return NextResponse.json({ error: authError.message }, { status: 400 });
     }
-  );
 
-  console.log("Auth user:", authUser, "Auth error:", authError);
+    const userId = authUser?.user?.id;
+    console.log("🔥 Auth user ID:", userId);
 
-  if (authError) {
-    return NextResponse.json({ error: authError.message }, { status: 400 });
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Auth user ID missing" },
+        { status: 500 }
+      );
+    }
+    const test = await supabaseServer.from("roles").select("*");
+    console.log("🔥 TEST QUERY:", test);
+    console.log("🔥 BACKEND URL:", process.env.SUPABASE_URL);
+    console.log(
+      "🔥 BACKEND SERVICE KEY:",
+      process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 15)
+    );
+
+    // 2️⃣ Fetch default role
+    const { data: role, error: roleError } = await supabaseServer
+      .from("roles")
+      .select("id")
+      .eq("name", "user")
+      .single();
+
+    console.log("🔥 Role lookup:", role, roleError);
+
+    if (roleError || !role) {
+      return NextResponse.json({ error: "Role not found" }, { status: 500 });
+    }
+
+    // 3️⃣ Update public.users
+    const { error: updateError } = await supabaseServer
+      .from("users")
+      .update({
+        first_name,
+        surname,
+        role_id: role.id,
+      })
+      .eq("id", userId);
+
+    console.log("🔥 Update result:", updateError);
+
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ message: "User registered successfully" });
+  } catch (err: any) {
+    console.error("🔥 SERVER CRASH:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
-
-  // 2️⃣ Get default role id ('user')
-  // const { data: role, error: roleError } = await superbaseServer
-  //   .from("roles")
-  //   .select("id")
-  //   .eq("name", "user")
-  //   .single();
-  // console.log("Role:", role, "Role error:", roleError);
-
-  // if (roleError || !role) {
-  //   return NextResponse.json(
-  //     { error: "Default role not found" },
-  //     { status: 500 }
-  //   );
-  // }
-
-  // 3️⃣ Insert the user into your users table
-  // const { error: insertError } = await superbaseServer.from("users").insert({
-  //   email,
-  //   role_id: role.id,
-  //   created_at: new Date(),
-  // });
-  // console.log("Insert error:", insertError);
-
-  // if (insertError) {
-  //   return NextResponse.json({ error: insertError.message }, { status: 500 });
-  // }
-  // console.log("insertError:", insertError);
-  // console.log("Inserting into users table...");
-
-  return NextResponse.json({ message: "User registered successfully" });
 }

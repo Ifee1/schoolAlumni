@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/sheet";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabaseClient";
 
 interface MenuItem {
   title: string;
@@ -67,71 +68,14 @@ const Navbar1 = ({
     {
       title: "Products",
       url: "#",
-      // items: [
-      //   {
-      //     title: "Blog",
-      //     description: "The latest industry news, updates, and info",
-      //     icon: <Book className="size-5 shrink-0" />,
-      //     url: "#",
-      //   },
-      //   {
-      //     title: "Company",
-      //     description: "Our mission is to innovate and empower the world",
-      //     icon: <Trees className="size-5 shrink-0" />,
-      //     url: "#",
-      //   },
-      //   {
-      //     title: "Careers",
-      //     description: "Browse job listing and discover our workspace",
-      //     icon: <Sunset className="size-5 shrink-0" />,
-      //     url: "#",
-      //   },
-      //   {
-      //     title: "Support",
-      //     description:
-      //       "Get in touch with our support team or visit our community forums",
-      //     icon: <Zap className="size-5 shrink-0" />,
-      //     url: "#",
-      //   },
-      // ],
     },
     {
       title: "Resources",
       url: "#",
-      // items: [
-      //   {
-      //     title: "Help Center",
-      //     description: "Get all the answers you need right here",
-      //     icon: <Zap className="size-5 shrink-0" />,
-      //     url: "#",
-      //   },
-      //   {
-      //     title: "Contact Us",
-      //     description: "We are here to help you with any questions you have",
-      //     icon: <Sunset className="size-5 shrink-0" />,
-      //     url: "#",
-      //   },
-      //   {
-      //     title: "Status",
-      //     description: "Check the current status of our services and APIs",
-      //     icon: <Trees className="size-5 shrink-0" />,
-      //     url: "#",
-      //   },
-      //   {
-      //     title: "Terms of Service",
-      //     description: "Our terms and conditions for using our services",
-      //     icon: <Book className="size-5 shrink-0" />,
-      //     url: "#",
-      //   },
-      // ],
     },
     {
-      title: "Pricing",
-      url: "#",
-    },
-    {
-      title: "Blog",
-      url: "#",
+      title: "Admin",
+      url: "/admin",
     },
   ],
   auth = {
@@ -149,6 +93,38 @@ const Navbar1 = ({
     window.addEventListener("scroll", handler);
     return () => window.removeEventListener("scroll", handler);
   }, []);
+
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Fetch auth user + profile
+  useEffect(() => {
+    async function loadUser() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) return; // not logged in
+
+      const userId = session.user.id;
+
+      // get name from public.users
+      const { data } = await supabase
+        .from("users")
+        .select("first_name")
+        .eq("id", userId)
+        .single();
+
+      setCurrentUser(data?.first_name ?? null);
+    }
+
+    loadUser();
+  }, []);
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  }
+
   return (
     <section className="relative py-10">
       <div
@@ -179,7 +155,7 @@ const Navbar1 = ({
                 </NavigationMenu>
               </div>
             </div>
-            <div className="flex gap-2">
+            {/* <div className="flex gap-2">
               <Button
                 asChild
                 variant="outline"
@@ -192,6 +168,33 @@ const Navbar1 = ({
               <Button asChild size="sm">
                 <Link href="/register">{auth.signup.title}</Link>
               </Button>
+            </div> */}
+            <div className="flex gap-2">
+              {!currentUser ? (
+                <>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-[#41CC00] bg-transparent "
+                  >
+                    <Link href="/login">{auth.login.title}</Link>
+                  </Button>
+
+                  <Button asChild size="sm">
+                    <Link href="/register">{auth.signup.title}</Link>
+                  </Button>
+                </>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-sm font-semibold">
+                    Welcome, {currentUser}
+                  </p>
+                  <Button variant="outline" size="sm" onClick={handleLogout}>
+                    Logout
+                  </Button>
+                </div>
+              )}
             </div>
           </nav>
 
@@ -232,13 +235,35 @@ const Navbar1 = ({
                     >
                       {menu.map((item) => renderMobileMenuItem(item))}
                     </Accordion>
+                    <div className="flex gap-2">
+                      {!currentUser ? (
+                        <>
+                          <Button
+                            asChild
+                            variant="outline"
+                            size="sm"
+                            className="hover:bg-[#41CC00] bg-transparent "
+                          >
+                            <Link href="/login">{auth.login.title}</Link>
+                          </Button>
 
-                    <div className="flex flex-col gap-3">
+                          <Button asChild size="sm">
+                            <Link href="/register">{auth.signup.title}</Link>
+                          </Button>
+                        </>
+                      ) : (
+                        <p className="text-sm font-semibold">
+                          Welcome, {currentUser}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* <div className="flex flex-col gap-3">
                       <Button asChild variant="outline">
                         {auth.login.title}
                       </Button>
                       <Button asChild>{auth.signup.title}</Button>
-                    </div>
+                    </div> */}
                   </div>
                 </SheetContent>
               </Sheet>
