@@ -9,12 +9,16 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
+import { createPagesBrowserClient } from "@supabase/auth-helpers-nextjs";
+
+const supabase = createPagesBrowserClient();
+
+// import { supabase } from "@/lib/supabaseClient";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -32,6 +36,8 @@ function LoginPage() {
       toast.error(error.message);
       return;
     }
+
+    console.log("Login data", data);
 
     toast.success("Logged in!");
     router.push("/");

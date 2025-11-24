@@ -252,18 +252,20 @@ const Navbar1 = ({
                           </Button>
                         </>
                       ) : (
-                        <p className="text-sm font-semibold">
-                          Welcome, {currentUser}
-                        </p>
+                        <div className="flex items-center justify-center gap-2">
+                          <p className="text-sm font-semibold">
+                            Welcome, {currentUser}
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleLogout}
+                          >
+                            Logout
+                          </Button>
+                        </div>
                       )}
                     </div>
-
-                    {/* <div className="flex flex-col gap-3">
-                      <Button asChild variant="outline">
-                        {auth.login.title}
-                      </Button>
-                      <Button asChild>{auth.signup.title}</Button>
-                    </div> */}
                   </div>
                 </SheetContent>
               </Sheet>
