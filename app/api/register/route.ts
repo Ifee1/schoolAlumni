@@ -4,17 +4,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 
 export async function POST(req: NextRequest) {
+  const supabase = supabaseServer();
   try {
     const body = await req.json();
 
     const { email, password, first_name, surname } = body;
 
     // 1️⃣ Create auth user
-    const { data: authUser, error: authError } =
-      await supabaseServer.auth.signUp({
-        email,
-        password,
-      });
+    const { data: authUser, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
     if (authError) {
       return NextResponse.json({ error: authError.message }, { status: 400 });
@@ -28,10 +28,10 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
-    const test = await supabaseServer.from("roles").select("*");
+    const test = await supabase.from("roles").select("*");
 
     // 2️⃣ Fetch default role
-    const { data: role, error: roleError } = await supabaseServer
+    const { data: role, error: roleError } = await supabase
       .from("roles")
       .select("id")
       .eq("name", "user")
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 3️⃣ Update public.users
-    const { error: updateError } = await supabaseServer
+    const { error: updateError } = await supabase
       .from("users")
       .update({
         first_name,
