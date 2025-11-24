@@ -1,9 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 
 export function supabaseServer() {
-  return createClient(
-    process.env.SUPABASE_URL || "",
-    process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-    { auth: { persistSession: false } }
-  );
+  return createRouteHandlerClient({ cookies });
 }
