@@ -28,7 +28,6 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
-    const test = await supabase.from("roles").select("*");
 
     // 2️⃣ Fetch default role
     const { data: role, error: roleError } = await supabase
