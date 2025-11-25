@@ -39,10 +39,6 @@ function Chatpage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  useEffect(() => {
     const channel = supabase
       .channel("table-db-changes")
       .on(
@@ -111,13 +107,15 @@ function Chatpage() {
       channel.unsubscribe();
     };
   }, []);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const [someoneTyping, setSomeoneTyping] = useState(false);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(
     null
   );
 
-  // const [typingChannelReady, setTypingChannelReady] = useState(false);
   const [messageInput, setMessageInput] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -235,9 +233,11 @@ function Chatpage() {
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {someoneTyping && (
-          <p className="text-gray-500 text-sm italic mb-2">
-            Someone is typing…
-          </p>
+          <div className="text-left">
+            <p className="text-gray-500 text-sm italic mb-2 animate-pulse">
+              Someone is typing…
+            </p>
+          </div>
         )}
 
         {messages.map((msg) => (
