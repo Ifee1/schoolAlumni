@@ -15,6 +15,8 @@ type ChatMessage = {
   media_url?: string;
   media_type?: string;
 };
+const typingChannel = supabase.channel("typing-events");
+let typingTimeout: any = null;
 
 function Chatpage() {
   useEffect(() => {
@@ -97,9 +99,7 @@ function Chatpage() {
     };
   }, []);
 
-  const typingChannel = supabase.channel("typing-events");
   const [someoneTyping, setSomeoneTyping] = useState(false);
-  let typingTimeout: any = null;
   const [messageInput, setMessageInput] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
