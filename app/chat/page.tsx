@@ -7,6 +7,7 @@ import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 
 type ChatMessage = {
+  created_at: string | undefined;
   sender_id: string | undefined;
   id: number | string;
   sender: string;
@@ -41,7 +42,7 @@ function Chatpage() {
 
   useEffect(() => {
     const channel = supabase
-      .channel("table-db-changes") // can be any name
+      .channel("table-db-changes")
       .on(
         "postgres_changes",
         {
@@ -68,6 +69,37 @@ function Chatpage() {
     };
   }, []);
 
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setCurrentUserId(data.user?.id || null);
+    };
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    const channel = typingChannel
+      .on("broadcast", { event: "typing" }, (payload) => {
+        setSomeoneTyping(true);
+
+        // auto-hide after 3 seconds of no typing
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+          setSomeoneTyping(false);
+        }, 3000);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const typingChannel = supabase.channel("typing-events");
+  const [someoneTyping, setSomeoneTyping] = useState(false);
+  let typingTimeout: any = null;
   const [messageInput, setMessageInput] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -106,8 +138,6 @@ function Chatpage() {
         return;
       }
 
-      setMessages((prev) => [...prev, data]);
-
       setPreviewImage(null);
       setSelectedFile(null);
       return;
@@ -118,23 +148,18 @@ function Chatpage() {
 
     const text = messageInput.trim();
 
-    const { data, error } = await supabase
-      .from("messages")
-      .insert({
-        sender_id: user.id,
-        content: text,
-        media_url: null,
-        media_type: null,
-      })
-      .select()
-      .single();
+    const { data, error } = await supabase.from("messages").insert({
+      sender_id: user.id,
+      content: text,
+      media_url: null,
+      media_type: null,
+    });
 
     if (error) {
       console.error("Failed to save text", error);
       return;
     }
 
-    setMessages((prev) => [...prev, data]);
     setMessageInput("");
   };
 
@@ -179,25 +204,62 @@ function Chatpage() {
     return urlData.publicUrl;
   };
 
+  const formatTimestamp = (timestamp?: string) => {
+    if (!timestamp) return "";
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {someoneTyping && (
+          <p className="text-gray-500 text-sm italic mb-2">
+            Someone is typing…
+          </p>
+        )}
+
         {messages.map((msg) => (
-          <div key={msg.id} className="bg-white p-3 rounded shadow-sm">
-            <p className="font-semibold text-sm text-gray-600">{msg.sender}</p>
-            <p className="text-gray-950">{msg.content}</p>
-            {msg.media_url && msg.media_type === "image" && (
-              <Image
-                src={msg.media_url}
-                alt="chatImage"
-                width={350}
-                height={350}
-                className="max-w-xs rounded-lg mt-2"
-              />
-            )}
+          <div
+            key={msg.id}
+            className={`flex ${
+              msg.sender_id === currentUserId ? "justify-end" : "justify-start"
+            }`}
+          >
+            <div
+              className={`p-3 max-w-xs rounded-lg shadow-md mb-2 ${
+                msg.sender_id === currentUserId
+                  ? "bg-blue-600 text-white rounded-br-none"
+                  : "bg-gray-200 text-black rounded-bl-none"
+              }`}
+            >
+              {msg.content && <p>{msg.content}</p>}
+
+              {msg.media_url && msg.media_type === "image" && (
+                <Image
+                  src={msg.media_url}
+                  alt="chat image"
+                  width={250}
+                  height={250}
+                  className="rounded-lg mt-2"
+                />
+              )}
+              <p
+                className={`text-xs mt-1 ${
+                  msg.sender_id === currentUserId
+                    ? "text-blue-200"
+                    : "text-gray-500"
+                }`}
+              >
+                {formatTimestamp(msg.created_at)}
+              </p>
+            </div>
           </div>
         ))}
+
         <div ref={bottomRef}></div>
       </div>
 
@@ -266,7 +328,16 @@ function Chatpage() {
           placeholder="Type a message..."
           className="flex-1 rounded-full px-4 py-4 text-gray-800 border-2 border-gray-800"
           value={messageInput}
-          onChange={(e) => setMessageInput(e.target.value)}
+          onChange={(e) => {
+            setMessageInput(e.target.value);
+
+            // Send typing status to others
+            typingChannel.send({
+              type: "broadcast",
+              event: "typing",
+              payload: { typing: true },
+            });
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
