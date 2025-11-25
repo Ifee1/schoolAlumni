@@ -91,7 +91,7 @@ const Hero7 = ({
   return (
     <section className="relative sm:py-16 lg:py-26 bg-cover bg-center h-screen text-white">
       <Image
-        src="/alumniheroImage.png"
+        src="/alumniHeroImage.png"
         alt="Alumni Hero"
         fill
         className="object-cover"
