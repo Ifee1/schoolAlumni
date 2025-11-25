@@ -84,15 +84,19 @@ function Chatpage() {
   useEffect(() => {
     const channel = typingChannel
       .on("broadcast", { event: "typing" }, (payload) => {
+        if (!payload?.payload?.typing) return;
+
         setSomeoneTyping(true);
 
-        // auto-hide after 3 seconds of no typing
+        // Reset the hiding timer
         clearTimeout(typingTimeout);
         typingTimeout = setTimeout(() => {
           setSomeoneTyping(false);
-        }, 3000);
+        }, 2500);
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Typing channel status:", status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -326,12 +330,11 @@ function Chatpage() {
         <Input
           type="text"
           placeholder="Type a message..."
-          className="flex-1 rounded-full px-4 py-4 text-gray-800 border-2 border-gray-800"
+          className="flex-1 rounded-full px-2 py-4 text-gray-800 border-2 border-gray-800 w-full"
           value={messageInput}
           onChange={(e) => {
             setMessageInput(e.target.value);
 
-            // Send typing status to others
             typingChannel.send({
               type: "broadcast",
               event: "typing",
