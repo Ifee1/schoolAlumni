@@ -90,13 +90,15 @@ const Hero7 = ({
   }, []);
   return (
     <section className="relative sm:py-16 lg:py-26 bg-cover bg-center h-screen text-white">
-      <Image
-        src="/alumniHeroImage.png"
-        alt="Alumni Hero"
-        fill
-        className="object-cover z-10"
-        priority
-      />
+      <div className="absolute inset-0 -z-10">
+        <Image
+          src="/alumniHeroImage.png"
+          alt="Alumni Hero"
+          fill
+          className="object-cover z-10"
+          priority
+        />
+      </div>
       <div className="absolute top-0 left-0 w-full z-30">
         <Navbar1 />
       </div>
