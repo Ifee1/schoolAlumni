@@ -41,7 +41,7 @@ function Chatpage() {
 
   useEffect(() => {
     const channel = supabase
-      .channel("messages-realtime")
+      .channel("table-db-changes") // can be any name
       .on(
         "postgres_changes",
         {
@@ -49,22 +49,20 @@ function Chatpage() {
           schema: "public",
           table: "messages",
         },
-        async (payload) => {
+        (payload) => {
           console.log("REALTIME EVENT RECEIVED:", payload);
+
           const newMessage = payload.new as ChatMessage;
 
-          const {
-            data: { user },
-          } = await supabase.auth.getUser();
-
-          if (newMessage.sender_id === user?.id) return;
-
-          setMessages((prev) => [...prev, newMessage]);
+          setMessages((prev) => {
+            // avoid duplicates
+            if (prev.some((m) => m.id === newMessage.id)) return prev;
+            return [...prev, newMessage];
+          });
         }
       )
       .subscribe();
 
-    // IMPORTANT: cleanup must NOT be async
     return () => {
       supabase.removeChannel(channel);
     };
