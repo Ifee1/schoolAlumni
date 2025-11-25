@@ -84,8 +84,13 @@ function Chatpage() {
   }, []);
 
   useEffect(() => {
-    const channel = supabase
-      .channel("typing-events")
+    if (!typingChannelRef.current) {
+      typingChannelRef.current = supabase.channel("typing-events");
+    }
+
+    const channel = typingChannelRef.current;
+
+    const subscription = channel
       .on("broadcast", { event: "typing" }, (payload) => {
         console.log("🔥 RECEIVED TYPING EVENT:", payload);
 
@@ -96,20 +101,23 @@ function Chatpage() {
         clearTimeout(typingTimeout);
         typingTimeout = setTimeout(() => {
           setSomeoneTyping(false);
-        }, 2500);
+        }, 2000);
       })
       .subscribe((status) => {
         console.log("📡 Typing channel status:", status);
-        if (status === "SUBSCRIBED") setTypingChannelReady(true);
       });
 
     return () => {
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
   }, []);
 
   const [someoneTyping, setSomeoneTyping] = useState(false);
-  const [typingChannelReady, setTypingChannelReady] = useState(false);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(
+    null
+  );
+
+  // const [typingChannelReady, setTypingChannelReady] = useState(false);
   const [messageInput, setMessageInput] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -340,15 +348,11 @@ function Chatpage() {
           value={messageInput}
           onChange={(e) => {
             setMessageInput(e.target.value);
-
-            if (typingChannelReady) {
-              console.log("✉️ Sending typing event");
-              supabase.channel("typing-events").send({
-                type: "broadcast",
-                event: "typing",
-                payload: { typing: true },
-              });
-            }
+            typingChannelRef.current?.send({
+              type: "broadcast",
+              event: "typing",
+              payload: { typing: true },
+            });
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
