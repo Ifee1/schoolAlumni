@@ -1,3 +1,5 @@
+"use client";
+
 import { About3 } from "@/components/about3";
 import { Feature197 } from "@/components/feature197";
 import { Footer2 } from "@/components/footer2";

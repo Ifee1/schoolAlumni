@@ -70,8 +70,8 @@ const Navbar1 = ({
       url: "#",
     },
     {
-      title: "Resources",
-      url: "#",
+      title: "Chatrooom",
+      url: "/chat",
     },
     {
       title: "Admin",
