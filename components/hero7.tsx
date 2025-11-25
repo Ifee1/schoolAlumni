@@ -90,26 +90,6 @@ const Hero7 = ({
   }, []);
   return (
     <section className="relative sm:py-16 lg:py-26 bg-cover bg-center h-screen text-white">
-      {/* <div className="absolute inset-0 -z-10">
-        <Image
-          src="/alumni_hero_image.png"
-          alt="Alumni Hero"
-          fill
-          className="object-cover z-10"
-          priority
-        />
-      </div> */}
-      {/* <div className="absolute inset-0 -z-10 h-full w-full">
-        <Image
-          src="/alumni_hero_image.png"
-          alt="Alumni Hero"
-          fill
-          sizes="100vw"
-          className="object-cover"
-          priority
-        />
-      </div> */}
-
       <div className="absolute top-0 left-0 w-full z-30">
         <Navbar1 />
       </div>
@@ -118,7 +98,10 @@ const Hero7 = ({
         alt="Alumni Hero"
         fill
         sizes="100vw"
-        className="object-cover"
+        className="object-cover  object-[50%_70%]      
+    sm:object-[50%_60%]   
+    md:object-center "
+        // className="object-cover"
         priority
       />
       <div className="absolute inset-0 bg-black/40 z-20"></div>

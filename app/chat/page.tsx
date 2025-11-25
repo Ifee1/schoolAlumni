@@ -7,6 +7,7 @@ import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 
 type ChatMessage = {
+  sender_id: string | undefined;
   id: number | string;
   sender: string;
   content?: string;
@@ -33,9 +34,41 @@ function Chatpage() {
     loadMessages();
   }, []);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("messages-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        async (payload) => {
+          console.log("REALTIME EVENT RECEIVED:", payload);
+          const newMessage = payload.new as ChatMessage;
+
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+
+          if (newMessage.sender_id === user?.id) return;
+
+          setMessages((prev) => [...prev, newMessage]);
+        }
+      )
+      .subscribe();
+
+    // IMPORTANT: cleanup must NOT be async
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const [messageInput, setMessageInput] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
