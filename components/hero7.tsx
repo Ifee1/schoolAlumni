@@ -31,7 +31,7 @@ const Hero7 = ({
   description = "Join a vibrant network of alumni, share experiences, access resources, and create opportunities together. Create meaningful connections and opportunities together",
   button = {
     text: "Join the community",
-    url: "https://www.shadcnblocks.com",
+    url: "/register",
   },
   reviews = {
     count: 200,
