@@ -10,6 +10,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabaseClient";
@@ -34,13 +42,14 @@ function RegisterPage({ mode = "signup", user, onDone }: AuthCardProps) {
   const [firstName, setFirstName] = useState(user?.first_name ?? "");
   const [surname, setSurname] = useState(user?.surname ?? "");
   const [roleId, setRoleId] = useState(user?.role_id ?? 1);
-
   const [password, setPassword] = useState("");
-
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const isDialog = mode === "edit";
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (mode === "signup") {
       const res = await fetch("/api/register", {
         method: "POST",
@@ -50,6 +59,7 @@ function RegisterPage({ mode = "signup", user, onDone }: AuthCardProps) {
           surname: surname,
           email,
           password,
+          graduation_year: selectedYear,
         }),
       });
 
@@ -86,12 +96,14 @@ function RegisterPage({ mode = "signup", user, onDone }: AuthCardProps) {
           role_id: roleId,
         })
         .eq("id", user?.id);
+
       toast.success("User updated!");
 
       if (error) {
         console.error(error);
         return;
       }
+
       setTimeout(() => {
         if (onDone) onDone();
       }, 3000);
@@ -111,9 +123,21 @@ function RegisterPage({ mode = "signup", user, onDone }: AuthCardProps) {
     }
   };
 
+  const years = Array.from(
+    { length: new Date().getFullYear() - 1999 + 1 },
+    (_, i) => 1999 + i
+  );
+
   return (
-    <section className="flex items-center justify-center min-h-screen bg-[#CEDDF3]">
-      <Card className="w-full max-w-sm mx-auto z-40 ">
+    // <section className="flex items-center justify-center min-h-screen bg-[#CEDDF3]">
+    <section
+      className={
+        isDialog
+          ? "" // inside Dialog → no fullscreen section
+          : "flex items-center justify-center min-h-screen bg-[#CEDDF3]"
+      }
+    >
+      <Card className="w-full max-w-sm mx-auto">
         <CardHeader>
           <CardTitle>Sign up</CardTitle>
           <CardDescription>Enter your data below</CardDescription>
@@ -151,16 +175,17 @@ function RegisterPage({ mode = "signup", user, onDone }: AuthCardProps) {
                   required
                 />
               </div>
+
               {mode === "signup" && (
                 <div className="grid gap-2">
                   <div className="flex items-center">
                     <Label htmlFor="password">Password</Label>
-                    <a
+                    {/* <a
                       href="#"
                       className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                     >
                       Forgot your password?
-                    </a>
+                    </a> */}
                   </div>
                   <Input
                     type="password"
@@ -171,6 +196,32 @@ function RegisterPage({ mode = "signup", user, onDone }: AuthCardProps) {
                   />
                 </div>
               )}
+            </div>
+            <div className="grid gap-2 pt-5">
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  asChild
+                  className="border border-gray-300 rounded-md align-center py-2 "
+                >
+                  <Button
+                    variant="outline"
+                    className="w-full justify-center text-center"
+                  >
+                    {selectedYear ? selectedYear : "Select graduation year"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuSeparator />
+                  {years.map((year) => (
+                    <DropdownMenuItem
+                      key={year}
+                      onClick={() => setSelectedYear(year)}
+                    >
+                      {year}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <CardFooter className="flex-col gap-2 py-4">
               <Button type="submit" className="w-full">

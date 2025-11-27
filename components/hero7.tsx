@@ -104,9 +104,9 @@ const Hero7 = ({
         // className="object-cover"
         priority
       />
-      <div className="absolute inset-0 bg-black/40 z-20"></div>
+      <div className="absolute inset-0 bg-[#120920]/30 z-20"></div>
 
-      <div className="mx-auto container text-center flex items-center justify-center flex-col gap-4 py-24 z-30 relative">
+      <div className="mx-auto container text-center flex items-center justify-center flex-col gap-4 py-24 z-50 relative">
         <div className="flex max-w-5xl items-center justify-center flex-col gap-6">
           <h1 className="text-2xl font-semibold lg:text-6xl mt-2 hero-line md:text-4xl">
             {heading}
