@@ -126,9 +126,9 @@ const Navbar1 = ({
   }
 
   return (
-    <section className="relative py-10">
+    <section className="relative">
       <div
-        className={`fixed top-4 left-0 w-full h-[6vh] z-10000 transition-all duration-200
+        className={`fixed top-4 left-0 w-full h-[6vh] z-9999 transition-all duration-200
       ${navBg ? "bg-[#efbec673] shadow-md" : "bg-transparent"}
     `}
       >
@@ -211,7 +211,11 @@ const Navbar1 = ({
               </a>
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="icon">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="pointer-events-auto"
+                  >
                     <Menu className="size-4" />
                   </Button>
                 </SheetTrigger>
